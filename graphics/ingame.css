@@ -1,0 +1,54 @@
+.blueBanner{
+	background-color: rgb(128, 157, 255);
+	width: 200px;
+	height: 80px;
+}
+.redBanner{
+	background-color: rgb(255, 128, 128);
+	width: 200px;
+	height: 80px;
+}
+.blueLevel{
+    font-size: 60px;
+  	font-family: "Refrigerator Deluxe";
+  	color: #FFFFFF;
+	font-weight: Bold;
+	text-align: right;
+	padding-right: 10px;
+}
+.redLevel{
+    font-size: 60px;
+  	font-family: "Refrigerator Deluxe";
+  	color: #FFFFFF;
+	font-weight: Bold;
+	text-align: left;
+	padding-left: 10px;
+}
+.blueSideBanner{
+	position: absolute;
+	left: -210px;
+}
+.redSideBanner{
+	position: absolute;
+	left: 1930px;
+}
+.summoner1Banner{
+	position: absolute;
+	top: 150px;
+}
+.summoner2Banner{
+	position: absolute;
+	top: 253px;
+}
+.summoner3Banner{
+	position: absolute;
+	top: 356px;
+}
+.summoner4Banner{
+	position: absolute;
+	top: 458px;
+}
+.summoner5Banner{
+	position: absolute;
+	top: 561px;
+}
