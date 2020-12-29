@@ -1,0 +1,29 @@
+{
+  "name": "ingameTools",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "nodecg": {
+    "compatibleRange": "^1.0.0",
+    "dashboardPanels": [
+      {
+        "name": "ingame",
+        "title": "ingame",
+        "file": "ingame.html"
+      }
+    ],
+    "graphics": [
+      {
+        "file": "ingame.html",
+        "width": 1920,
+        "height": 1080
+      }
+    ]
+  }
+}
