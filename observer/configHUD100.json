@@ -1,0 +1,7 @@
+{
+	"game_pos_offset": [0, 60],
+	"level_pos_offset": [33, 188],
+	"level_box_size": [15, 8],
+	"level_X_interval": 1837,
+	"level_Y_interval": 103
+}

@@ -2,14 +2,13 @@ import json
 import time
 import threading
 
-
+configName = "configHUD100.json"
 def loadJSON(name):
 	global data
 	data = open(name, 'r')
 	data = json.load(data)
 
 response = []
-
 
 #サーバー用の関数------------------------------------------------------------
 from wsgiref.simple_server import make_server
@@ -27,7 +26,6 @@ def startServer():
 	with make_server('', 3000, app) as httpd:
 		print("Serving on port 3000...")
 		httpd.serve_forever()
-#--------------------------------------------------------------------------
 
 #ゲーム監視用の諸々----------------------------------------------------------
 import pytesseract
@@ -78,13 +76,14 @@ def printState(champion_state):
 
 def lolObserver():
 	global response
+	config = json.load(open(configName, 'r'))
 	#ゲームクライアントの原点座標（通常[0,0]）
-	game_pos_offset = [0, 60]
+	game_pos_offset = config["game_pos_offset"]
 	#レベル周りの座標設定
-	level_pos_offset = [33, 188]
-	level_box_size = [15, 8]
-	level_X_interval = 1837
-	level_Y_interval = 103
+	level_pos_offset = config["level_pos_offset"]
+	level_box_size = config["level_box_size"]
+	level_X_interval = config["level_X_interval"]
+	level_Y_interval = config["level_Y_interval"]
 	level_boxes = levelBoxes( game_pos_offset, level_pos_offset, level_X_interval, level_Y_interval, level_box_size )
 
 	champion_state = initState(level_boxes)
