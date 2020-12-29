@@ -2,13 +2,14 @@ import json
 import time
 import threading
 
-data = []
+
 def loadJSON(name):
 	global data
 	data = open(name, 'r')
 	data = json.load(data)
 
-response = [json.dumps(data).encode("utf-8")]
+response = []
+
 
 #サーバー用の関数------------------------------------------------------------
 from wsgiref.simple_server import make_server
@@ -36,6 +37,7 @@ from PIL import Image
 from PIL import ImageGrab
 import numpy as np
 import matplotlib.pyplot as plt
+from levelChecker import initLevelImgBuff, levelBoxes, levelCheck
 pytesseract.pytesseract.tesseract_cmd = r'G:\Program Files\Tesseract-OCR\tesseract.exe'
 pyocr.tesseract.TESSERACT_CMD = r'G:\Program Files\Tesseract-OCR\tesseract.exe'
 
@@ -55,23 +57,12 @@ def show(img):
 	plt.imshow(img)
 	plt.show()
 
-def isDead(img):
-	#img = np.array(img)
-	for i in img:
-		for j in i:
-			if not(j[0]==j[1] and j[1]==j[2]):
-				return False
-	return True
-
 def initState(level_boxes):
-	game_img = screenShot()
-	state = [{} for i in range(10)]
+	champion_state = [{} for i in range(10)]
 	for i in range(10):
-		state[i]["level"] = 3
-		state[i]["dead"] = False
-		img = game_img.crop(level_boxes[i])
-		state[i]["level_img"] = np.array(img)
-	return state
+		champion_state[i]["level"] = 3
+		champion_state[i]["dead"] = False
+	return champion_state
 
 def printState(champion_state):
 	print("------------------------------")
@@ -85,31 +76,7 @@ def printState(champion_state):
 		out = blueOut.ljust(30) + redOut
 		print(out)
 
-def levelBoxes(pos0, pos1, ix, iy, box_size):
-	x0 = pos0[0] + pos1[0]
-	y0 = pos0[1] + pos1[1]
-	bx, by = box_size
-	blue_level_poss = []
-	red_level_poss = []
-	for i in range(5):
-		y = y0 + iy*i
-		blue_level_poss.append([x0, y, x0+bx, y+by])
-		red_level_poss.append([x0+ix, y, x0+ix+bx, y+by])
-	return blue_level_poss + red_level_poss
-
-def levelCheck(game_img, champion_state, level_boxes):
-	for i, state in enumerate(champion_state):
-		img = game_img.crop(level_boxes[i])
-		img = np.array(img)
-		#print(level_boxes[i])
-		#show(img)
-		state["dead"] = isDead(img)
-		if (not state["dead"]) and (not np.array_equal(img, state["level_img"])):
-			if (i<5 and (img[0][14]==state["level_img"][0][14]).all()) or (i>=5 and (img[0][0]==state["level_img"][0][0]).all()):
-				state["level"] += 1
-				state["level_img"] = img
-
-def lolSbservation():
+def lolObserver():
 	global response
 	#ゲームクライアントの原点座標（通常[0,0]）
 	game_pos_offset = [0, 60]
@@ -121,7 +88,7 @@ def lolSbservation():
 	level_boxes = levelBoxes( game_pos_offset, level_pos_offset, level_X_interval, level_Y_interval, level_box_size )
 
 	champion_state = initState(level_boxes)
-	printState(champion_state)
+	levelImgBuff = initLevelImgBuff(screenShot(), level_boxes)
 
 	auto_notice_levels = [6, 11, 16]
 	auto_notice_frags = initFrags(auto_notice_levels)
@@ -131,26 +98,26 @@ def lolSbservation():
   		print('pyocrが見付かりません。pyocrをインストールして下さい。')
 
 	timers = timeInit(1)
-	dt = [0.2]
+	dt = [1]
 	state_update = False
 	while True:
 
 		if getTime() - timers[0] > dt[0]:
 			img = screenShot()
-			levelCheck(img, champion_state, level_boxes)
+			levelCheck(img, champion_state, level_boxes, levelImgBuff)
 			state_update = True
 			timers[0] = getTime()
 			
 		if state_update:
-			checkState(champion_state, auto_notice_levels, auto_notice_frags)
+			printData(champion_state, auto_notice_levels, auto_notice_frags)
 
-			#printState(champion_state)
-			printJSON(champion_state)
+			#printState()
+			#printJSON()
 			print(data)
 			response = [json.dumps(data).encode("utf-8")]
 			state_update = False
 		
-#バナー情報管理------------------------------------------------------------
+#描画情報管理------------------------------------------------------------
 def initFrags(levels):
 	frags = []
 	for i in range(len(levels)):
@@ -170,30 +137,20 @@ def bannerManeger(smID, mode):
 	t.start()
 
 	
-def checkState(champion_state, levels, frags):
+def printData(champion_state, levels, frags):
 	for i,state in enumerate(champion_state):
+		data["level"][i] = champion_state[i]["level"]
 		for j,level in enumerate(levels):
 			if frags[j][i] and state["level"] == level:
 				frags[j][i] = False
 				bannerManeger(i, "level")
-				#print(str(i) + " bunner!")
-
-
-
-		
-#JSONへの書き込み----------------------------------------------------------
-def printJSON(state):
-	global data
-	for i in range(10):
-		data["level"][i] = state[i]["level"]
 		
 #-------------------------------------------------------------------------
 def main():
 	loadJSON("data.json")
-	print(data)
 
 	t1 = threading.Thread(target=startServer)
-	t2 = threading.Thread(target=lolSbservation)
+	t2 = threading.Thread(target=lolObserver)
 
 	t1.setDaemon(True)
 	t2.setDaemon(True)

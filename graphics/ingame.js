@@ -30,6 +30,7 @@ function setText(smID, type){
 	var elID;
 	if(type=="level") idName = "Level";
 	if(type=="csmin") idName = "CSmin";
+	if(type=="Item") idName = "Item";
 	
 	if(smID<5){
 		idName = "blue" + idName + (smID+1);
